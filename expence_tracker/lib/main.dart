@@ -20,6 +20,7 @@ void main() async {
 
   // Register Hive adapters
   Hive.registerAdapter(UserSettingsAdapter());
+  Hive.registerAdapter(TransactionCategoryAdapter());
   Hive.registerAdapter(TransactionAdapter());
   Hive.registerAdapter(LoanAdapter());
   Hive.registerAdapter(LoanPaymentAdapter());

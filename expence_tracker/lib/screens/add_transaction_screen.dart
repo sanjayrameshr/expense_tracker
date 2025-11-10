@@ -5,7 +5,7 @@ import '../models/loan.dart';
 import '../providers/finance_provider.dart';
 import '../utils/currency_formatter.dart';
 
-/// Screen for adding new transactions
+/// Elegant modern UI for adding new transactions
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
 
@@ -32,7 +32,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   void _calculateLoanSplit() {
     if (_selectedLoan == null || _amountController.text.isEmpty) return;
-
     final amount = double.tryParse(_amountController.text);
     if (amount == null) return;
 
@@ -66,7 +65,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Transaction added successfully')),
+        const SnackBar(
+          content: Text('Transaction added successfully'),
+          behavior: SnackBarBehavior.floating,
+        ),
       );
       Navigator.pop(context);
     }
@@ -74,103 +76,122 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final background = const Color(0xFFF8F9FB);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Transaction')),
+      backgroundColor: background,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: background,
+        title: const Text(
+          'Add Transaction',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        foregroundColor: Colors.grey.shade800,
+      ),
       body: Consumer<FinanceProvider>(
         builder: (context, finance, _) {
-          return Form(
-            key: _formKey,
-            child: ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                // Category dropdown
-                DropdownButtonFormField<TransactionCategory>(
-                  value: _selectedCategory,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
-                  ),
-                  items:
-                      TransactionCategory.values.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(_categoryName(category)),
-                        );
-                      }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCategory = value!;
-                      _selectedLoan = null;
-                      _interestPortion = null;
-                      _principalPortion = null;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  _buildFormCard(finance),
+                  const SizedBox(height: 24),
+                  _buildSubmitButton(),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
-                // Amount field
-                TextFormField(
-                  controller: _amountController,
-                  decoration: const InputDecoration(
-                    labelText: 'Amount',
-                    border: OutlineInputBorder(),
-                    prefixText: '₹',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter amount';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Please enter valid amount';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    if (_selectedCategory == TransactionCategory.loanPayment) {
-                      _calculateLoanSplit();
-                    }
-                  },
-                ),
-                const SizedBox(height: 16),
+  Widget _buildFormCard(FinanceProvider finance) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Transaction Details',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 16),
 
-                // Description field
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter description';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
+            // Category dropdown
+            _buildDropdownField<TransactionCategory>(
+              label: 'Category',
+              value: _selectedCategory,
+              items: TransactionCategory.values,
+              displayText: _categoryName,
+              onChanged: (value) {
+                setState(() {
+                  _selectedCategory = value!;
+                  _selectedLoan = null;
+                  _interestPortion = null;
+                  _principalPortion = null;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
 
-                // Loan selection for loan payments
-                if (_selectedCategory == TransactionCategory.loanPayment) ...[
-                  DropdownButtonFormField<Loan>(
+            // Amount
+            _buildTextField(
+              controller: _amountController,
+              label: 'Amount',
+              prefix: '₹',
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value == null || value.isEmpty)
+                  return 'Please enter amount';
+                if (double.tryParse(value) == null) return 'Enter valid number';
+                return null;
+              },
+              onChanged: (_) {
+                if (_selectedCategory == TransactionCategory.loanPayment) {
+                  _calculateLoanSplit();
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Description
+            _buildTextField(
+              controller: _descriptionController,
+              label: 'Description',
+              validator:
+                  (value) =>
+                      value == null || value.isEmpty
+                          ? 'Please enter description'
+                          : null,
+            ),
+            const SizedBox(height: 16),
+
+            // Loan selection
+            if (_selectedCategory == TransactionCategory.loanPayment)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDropdownField<Loan>(
+                    label: 'Select Loan',
                     value: _selectedLoan,
-                    decoration: const InputDecoration(
-                      labelText: 'Select Loan',
-                      border: OutlineInputBorder(),
-                    ),
-                    items:
-                        finance.loans.map((loan) {
-                          return DropdownMenuItem(
-                            value: loan,
-                            child: Text(
-                              '${loan.name} (${formatCurrency(loan.currentPrincipal)})',
-                            ),
-                          );
-                        }).toList(),
+                    items: finance.loans,
+                    displayText:
+                        (loan) =>
+                            '${loan.name} (${formatCurrency(loan.currentPrincipal)})',
                     onChanged: (value) {
-                      setState(() {
-                        _selectedLoan = value;
-                      });
+                      setState(() => _selectedLoan = value);
                       _calculateLoanSplit();
                     },
                     validator: (value) {
@@ -183,65 +204,131 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
-                  // Show interest/principal split
                   if (_interestPortion != null && _principalPortion != null)
-                    Card(
-                      color: Colors.blue.shade50,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Payment Split (Interest-first)',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Interest:'),
-                                Text(
-                                  formatCurrency(_interestPortion!),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text('Principal:'),
-                                Text(
-                                  formatCurrency(_principalPortion!),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    _buildLoanSplitCard(),
                 ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                const SizedBox(height: 24),
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? prefix,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+    void Function(String)? onChanged,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: const Color(0xFFF3F5F8),
+        prefixText: prefix,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      keyboardType: keyboardType,
+      validator: validator,
+      onChanged: onChanged,
+    );
+  }
 
-                // Submit button
-                ElevatedButton(
-                  onPressed: _submitTransaction,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text('Add Transaction'),
+  Widget _buildDropdownField<T>({
+    required String label,
+    required T? value,
+    required List<T> items,
+    required String Function(T) displayText,
+    required ValueChanged<T?> onChanged,
+    String? Function(T?)? validator,
+  }) {
+    return DropdownButtonFormField<T>(
+      value: value,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: const Color(0xFFF3F5F8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      items:
+          items
+              .map(
+                (item) => DropdownMenuItem(
+                  value: item,
+                  child: Text(displayText(item)),
                 ),
-              ],
+              )
+              .toList(),
+      onChanged: onChanged,
+      validator: validator,
+    );
+  }
+
+  Widget _buildLoanSplitCard() {
+    return Card(
+      elevation: 1,
+      color: const Color(0xFFEEF3F7),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Payment Split (Interest-first)',
+              style: TextStyle(fontWeight: FontWeight.w600),
             ),
-          );
-        },
+            const SizedBox(height: 8),
+            _splitRow('Interest', formatCurrency(_interestPortion!)),
+            _splitRow('Principal', formatCurrency(_principalPortion!)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _splitRow(String label, String value) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(color: Colors.grey.shade700)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _submitTransaction,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey.shade800,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: const Text(
+          'Add Transaction',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        ),
       ),
     );
   }

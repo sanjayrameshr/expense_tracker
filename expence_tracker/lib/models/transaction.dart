@@ -3,12 +3,19 @@ import 'package:hive/hive.dart';
 part 'transaction.g.dart';
 
 /// Transaction categories
+@HiveType(typeId: 10)
 enum TransactionCategory {
+  @HiveField(0)
   income,
+  @HiveField(1)
   spend,
+  @HiveField(2)
   family,
+  @HiveField(3)
   savingsDeposit,
+  @HiveField(4)
   loanPayment,
+  @HiveField(5)
   feePayment,
 }
 

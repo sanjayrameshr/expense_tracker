@@ -4,35 +4,45 @@ import '../models/fees_goal.dart';
 import '../providers/finance_provider.dart';
 import '../utils/currency_formatter.dart';
 
-/// Screen for managing fees and goals
+/// Modern, elegant Fees & Goals management screen
 class FeesScreen extends StatelessWidget {
   const FeesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final background = const Color(0xFFF8F9FB);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Fees & Goals')),
+      backgroundColor: background,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: background,
+        foregroundColor: Colors.grey.shade800,
+        title: const Text(
+          'Fees & Goals',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
       body: Consumer<FinanceProvider>(
         builder: (context, finance, _) {
           final goals = finance.feesGoals;
 
           if (goals.isEmpty) {
-            return const Center(child: Text('No goals yet'));
+            return _EmptyState(onAdd: () => _showAddGoalDialog(context));
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
             itemCount: goals.length,
-            itemBuilder: (context, index) {
-              final goal = goals[index];
-              return _GoalCard(goal: goal);
-            },
+            itemBuilder: (context, index) => _GoalCard(goal: goals[index]),
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddGoalDialog(context),
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.grey.shade800,
+        icon: const Icon(Icons.add_rounded),
+        label: const Text('Add Goal'),
       ),
     );
   }
@@ -48,28 +58,42 @@ class FeesScreen extends StatelessWidget {
           (context) => StatefulBuilder(
             builder:
                 (context, setState) => AlertDialog(
-                  title: const Text('Add Fees Goal'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  title: const Text(
+                    'Add Fees Goal',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      TextField(
+                      _buildTextField(
                         controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Goal Name',
-                        ),
+                        label: 'Goal Name',
                       ),
-                      TextField(
+                      const SizedBox(height: 16),
+                      _buildTextField(
                         controller: amountController,
-                        decoration: const InputDecoration(
-                          labelText: 'Target Amount',
-                        ),
+                        label: 'Target Amount (₹)',
                         keyboardType: TextInputType.number,
                       ),
                       const SizedBox(height: 16),
                       ListTile(
+                        tileColor: const Color(0xFFF3F5F8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         title: const Text('Due Date'),
                         subtitle: Text(formatDate(selectedDate)),
-                        trailing: const Icon(Icons.calendar_today),
+                        trailing: const Icon(
+                          Icons.calendar_today_rounded,
+                          color: Colors.grey,
+                        ),
                         onTap: () async {
                           final date = await showDatePicker(
                             context: context,
@@ -79,9 +103,7 @@ class FeesScreen extends StatelessWidget {
                               const Duration(days: 3650),
                             ),
                           );
-                          if (date != null) {
-                            setState(() => selectedDate = date);
-                          }
+                          if (date != null) setState(() => selectedDate = date);
                         },
                       ),
                     ],
@@ -91,13 +113,11 @@ class FeesScreen extends StatelessWidget {
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Cancel'),
                     ),
-                    TextButton(
+                    ElevatedButton(
                       onPressed: () async {
                         final amount = double.tryParse(amountController.text);
-
-                        if (nameController.text.isEmpty || amount == null) {
+                        if (nameController.text.isEmpty || amount == null)
                           return;
-                        }
 
                         final goal = FeesGoal(
                           id: 'goal_${DateTime.now().millisecondsSinceEpoch}',
@@ -109,10 +129,14 @@ class FeesScreen extends StatelessWidget {
                         final finance = context.read<FinanceProvider>();
                         await finance.saveFeesGoal(goal);
 
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                        }
+                        if (context.mounted) Navigator.pop(context);
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey.shade800,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
                       child: const Text('Add'),
                     ),
                   ],
@@ -120,8 +144,87 @@ class FeesScreen extends StatelessWidget {
           ),
     );
   }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: const Color(0xFFF3F5F8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
 }
 
+/// ----------------------------
+/// Elegant Empty State
+/// ----------------------------
+class _EmptyState extends StatelessWidget {
+  final VoidCallback onAdd;
+
+  const _EmptyState({required this.onAdd});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.school_outlined, size: 70, color: Colors.grey.shade400),
+            const SizedBox(height: 20),
+            Text(
+              'No Goals Yet',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Start by setting your first fee payment goal.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Create Goal'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey.shade800,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// ----------------------------
+/// Goal Card (Modern Styled)
+/// ----------------------------
 class _GoalCard extends StatelessWidget {
   final FeesGoal goal;
 
@@ -131,18 +234,36 @@ class _GoalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = goal.currentAmount / goal.targetAmount;
     final isOverdue = goal.dueDate.isBefore(DateTime.now());
+    final color =
+        isOverdue
+            ? Colors.red.shade400
+            : (progress >= 0.9
+                ? Colors.orange.shade400
+                : Colors.green.shade400);
 
     return Card(
+      elevation: 2,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title + Overdue Label
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(goal.name, style: Theme.of(context).textTheme.titleLarge),
+                Flexible(
+                  child: Text(
+                    goal.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
                 if (isOverdue)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -150,80 +271,95 @@ class _GoalCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(4),
+                      color: Colors.red.shade100,
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
                       'OVERDUE',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
               ],
             ),
+
             const SizedBox(height: 12),
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.grey.shade200,
-              color: isOverdue ? Colors.red : Colors.blue,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: progress.clamp(0.0, 1.0),
+                minHeight: 10,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: AlwaysStoppedAnimation(color),
+              ),
             ),
             const SizedBox(height: 12),
+
+            // Amount section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Target'),
-                    Text(
-                      formatCurrency(goal.targetAmount),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                _labelValue(
+                  'Target',
+                  formatCurrency(goal.targetAmount),
+                  color: Colors.grey.shade800,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text('Remaining'),
-                    Text(
-                      formatCurrency(goal.remainingAmount),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
-                      ),
-                    ),
-                  ],
+                _labelValue(
+                  'Remaining',
+                  formatCurrency(goal.remainingAmount),
+                  color: color,
                 ),
               ],
             ),
+
             const SizedBox(height: 12),
+
+            // Timeline info
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Due: ${formatDate(goal.dueDate)}'),
                 Text(
-                  '${goal.monthsLeft} months left',
-                  style: TextStyle(color: isOverdue ? Colors.red : Colors.grey),
+                  'Due: ${formatDate(goal.dueDate)}',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
+                Text(
+                  isOverdue
+                      ? 'Past due'
+                      : '${goal.monthsLeft} month${goal.monthsLeft == 1 ? '' : 's'} left',
+                  style: TextStyle(
+                    color: isOverdue ? Colors.red : Colors.grey.shade700,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+
+            const SizedBox(height: 10),
+
+            // Monthly saving info
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(4),
+                color: const Color(0xFFF3F5F8),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Required monthly saving:'),
+                  Text(
+                    'Required Monthly Saving',
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                  ),
                   Text(
                     formatCurrency(goal.requiredMonthlySaving),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
@@ -231,6 +367,26 @@ class _GoalCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _labelValue(String label, String value, {Color? color}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: color ?? Colors.grey.shade800,
+          ),
+        ),
+      ],
     );
   }
 }

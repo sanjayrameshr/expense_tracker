@@ -45,6 +45,15 @@ class SettingsScreen extends StatelessWidget {
             onTap: () => _openGPay(context),
           ),
           const Divider(),
+          const _SectionHeader(title: 'Data Management'),
+          ListTile(
+            leading: const Icon(Icons.add_circle, color: Colors.green),
+            title: const Text('Load Sample Data'),
+            subtitle: const Text('Add demo transactions, loans, and budgets'),
+            textColor: Colors.green,
+            onTap: () => _loadSampleData(context),
+          ),
+          const Divider(),
           const _SectionHeader(title: 'Danger Zone'),
           ListTile(
             leading: const Icon(Icons.delete_forever, color: Colors.red),
@@ -247,6 +256,49 @@ class SettingsScreen extends StatelessWidget {
           context,
         ).showSnackBar(SnackBar(content: Text('Could not open GPay: $e')));
       }
+    }
+  }
+
+  Future<void> _loadSampleData(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Load Sample Data'),
+            content: const Text(
+              'This will add:\n\n'
+              '• ₹20,000 initial cash\n'
+              '• Gold Loan of ₹1,10,000 @ 9% interest\n'
+              '• College Fees goal of ₹45,000\n'
+              '• Sample budgets for spending categories\n\n'
+              'Existing data will not be deleted.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.green),
+                child: const Text('Load Data'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirm != true) return;
+
+    final finance = context.read<FinanceProvider>();
+    await finance.seedInitialData();
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sample data loaded successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
     }
   }
 
