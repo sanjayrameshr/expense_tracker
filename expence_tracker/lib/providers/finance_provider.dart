@@ -180,36 +180,49 @@ class FinanceProvider extends ChangeNotifier {
 
   /// Seed initial data (for first run)
   Future<void> seedInitialData() async {
-    // Initial cash of 20,000
-    final initialCash = Transaction(
-      id: 'initial_${DateTime.now().millisecondsSinceEpoch}',
-      amount: 20000.0,
-      category: TransactionCategory.income,
-      description: 'Initial stipend',
-      date: DateTime.now(),
-    );
-    await addTransaction(initialCash);
+    // Initial cash of 20,000 - only add if not already added
+    final existingInitialStipend = _transactions
+        .where((t) => t.description == 'Initial stipend')
+        .firstOrNull;
+    if (existingInitialStipend == null) {
+      final initialCash = Transaction(
+        id: 'initial_${DateTime.now().millisecondsSinceEpoch}',
+        amount: 20000.0,
+        category: TransactionCategory.income,
+        description: 'Initial stipend',
+        date: DateTime.now(),
+      );
+      await addTransaction(initialCash);
+    }
 
-    // Gold loan
-    final goldLoan = Loan(
-      id: 'loan_${DateTime.now().millisecondsSinceEpoch}',
-      name: 'Gold Loan',
-      initialPrincipal: 110000.0,
-      currentPrincipal: 110000.0,
-      interestRateAnnual: 9.0,
-      startDate: DateTime.now(),
-    );
-    await saveLoan(goldLoan);
+    // Gold loan - only add if it doesn't exist
+    final existingGoldLoan =
+        _loans.where((l) => l.name == 'Gold Loan').firstOrNull;
+    if (existingGoldLoan == null) {
+      final goldLoan = Loan(
+        id: 'loan_${DateTime.now().millisecondsSinceEpoch}',
+        name: 'Gold Loan',
+        initialPrincipal: 110000.0,
+        currentPrincipal: 110000.0,
+        interestRateAnnual: 9.0,
+        startDate: DateTime.now(),
+      );
+      await saveLoan(goldLoan);
+    }
 
-    // Fees goal (45k due April next year)
-    final feesGoal = FeesGoal(
-      id: 'fees_${DateTime.now().millisecondsSinceEpoch}',
-      name: 'College Fees',
-      targetAmount: 45000.0,
-      currentAmount: 0.0,
-      dueDate: DateTime(2026, 4, 30),
-    );
-    await saveFeesGoal(feesGoal);
+    // Fees goal (45k due April next year) - only add if it doesn't exist
+    final existingFeesGoal =
+        _feesGoals.where((f) => f.name == 'College Fees').firstOrNull;
+    if (existingFeesGoal == null) {
+      final feesGoal = FeesGoal(
+        id: 'fees_${DateTime.now().millisecondsSinceEpoch}',
+        name: 'College Fees',
+        targetAmount: 45000.0,
+        currentAmount: 0.0,
+        dueDate: DateTime(2026, 4, 30),
+      );
+      await saveFeesGoal(feesGoal);
+    }
 
     // Seed default budgets
     await _seedDefaultBudgets();

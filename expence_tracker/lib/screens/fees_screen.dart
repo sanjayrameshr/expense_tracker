@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/fees_goal.dart';
 import '../providers/finance_provider.dart';
 import '../utils/currency_formatter.dart';
+import '../utils/app_colors.dart';
+import '../utils/app_styles.dart';
 
 /// Modern, elegant Fees & Goals management screen
 class FeesScreen extends StatelessWidget {
@@ -10,14 +12,12 @@ class FeesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = const Color(0xFFF8F9FB);
-
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: background,
-        foregroundColor: Colors.grey.shade800,
+        backgroundColor: AppColors.background,
+        foregroundColor: AppColors.textPrimary,
         title: const Text(
           'Fees & Goals',
           style: TextStyle(fontWeight: FontWeight.w600),
@@ -39,10 +39,12 @@ class FeesScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fees_fab',
         onPressed: () => _showAddGoalDialog(context),
-        backgroundColor: Colors.grey.shade800,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Add Goal'),
+        backgroundColor: AppButtonStyles.fabBackground,
+        icon: Icon(Icons.add_rounded, color: AppButtonStyles.fabIconColor),
+        label: Text('Add Goal',
+            style: TextStyle(color: AppButtonStyles.fabIconColor)),
       ),
     );
   }
@@ -54,94 +56,86 @@ class FeesScreen extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder:
-          (context) => StatefulBuilder(
-            builder:
-                (context, setState) => AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  title: const Text(
-                    'Add Fees Goal',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildTextField(
-                        controller: nameController,
-                        label: 'Goal Name',
-                      ),
-                      const SizedBox(height: 16),
-                      _buildTextField(
-                        controller: amountController,
-                        label: 'Target Amount (₹)',
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(height: 16),
-                      ListTile(
-                        tileColor: const Color(0xFFF3F5F8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        title: const Text('Due Date'),
-                        subtitle: Text(formatDate(selectedDate)),
-                        trailing: const Icon(
-                          Icons.calendar_today_rounded,
-                          color: Colors.grey,
-                        ),
-                        onTap: () async {
-                          final date = await showDatePicker(
-                            context: context,
-                            initialDate: selectedDate,
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(
-                              const Duration(days: 3650),
-                            ),
-                          );
-                          if (date != null) setState(() => selectedDate = date);
-                        },
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final amount = double.tryParse(amountController.text);
-                        if (nameController.text.isEmpty || amount == null)
-                          return;
-
-                        final goal = FeesGoal(
-                          id: 'goal_${DateTime.now().millisecondsSinceEpoch}',
-                          name: nameController.text,
-                          targetAmount: amount,
-                          dueDate: selectedDate,
-                        );
-
-                        final finance = context.read<FinanceProvider>();
-                        await finance.saveFeesGoal(goal);
-
-                        if (context.mounted) Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey.shade800,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text('Add'),
-                    ),
-                  ],
-                ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
+          title: const Text(
+            'Add Fees Goal',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTextField(
+                controller: nameController,
+                label: 'Goal Name',
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                controller: amountController,
+                label: 'Target Amount (₹)',
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                tileColor: const Color(0xFFF3F5F8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                title: const Text('Due Date'),
+                subtitle: Text(formatDate(selectedDate)),
+                trailing: const Icon(
+                  Icons.calendar_today_rounded,
+                  color: Colors.grey,
+                ),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(
+                      const Duration(days: 3650),
+                    ),
+                  );
+                  if (date != null) setState(() => selectedDate = date);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final amount = double.tryParse(amountController.text);
+                if (nameController.text.isEmpty || amount == null) return;
+
+                final goal = FeesGoal(
+                  id: 'goal_${DateTime.now().millisecondsSinceEpoch}',
+                  name: nameController.text,
+                  targetAmount: amount,
+                  dueDate: selectedDate,
+                );
+
+                final finance = context.read<FinanceProvider>();
+                await finance.saveFeesGoal(goal);
+
+                if (context.mounted) Navigator.pop(context);
+              },
+              style: AppButtonStyles.primaryElevated,
+              child: const Text('Add'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -203,17 +197,7 @@ class _EmptyState extends StatelessWidget {
               onPressed: onAdd,
               icon: const Icon(Icons.add_rounded),
               label: const Text('Create Goal'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey.shade800,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              style: AppButtonStyles.primaryLarge,
             ),
           ],
         ),
@@ -234,12 +218,9 @@ class _GoalCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final progress = goal.currentAmount / goal.targetAmount;
     final isOverdue = goal.dueDate.isBefore(DateTime.now());
-    final color =
-        isOverdue
-            ? Colors.red.shade400
-            : (progress >= 0.9
-                ? Colors.orange.shade400
-                : Colors.green.shade400);
+    final color = isOverdue
+        ? Colors.red.shade400
+        : (progress >= 0.9 ? Colors.orange.shade400 : Colors.green.shade400);
 
     return Card(
       elevation: 2,

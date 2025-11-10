@@ -4,6 +4,7 @@ import '../models/budget.dart';
 import '../models/transaction.dart';
 import '../providers/finance_provider.dart';
 import '../utils/currency_formatter.dart';
+import '../utils/app_styles.dart';
 
 /// Elegant UI for managing monthly budgets by category
 class BudgetScreen extends StatelessWidget {
@@ -74,18 +75,17 @@ class BudgetScreen extends StatelessWidget {
   void _showAddBudgetDialog(BuildContext context, FinanceProvider finance) {
     showDialog(
       context: context,
-      builder:
-          (_) => _BudgetDialog(
-            finance: finance,
-            onSave: (category, limit) {
-              final budget = Budget(
-                id: 'budget_${DateTime.now().millisecondsSinceEpoch}',
-                category: category,
-                monthlyLimit: limit,
-              );
-              finance.saveBudget(budget);
-            },
-          ),
+      builder: (_) => _BudgetDialog(
+        finance: finance,
+        onSave: (category, limit) {
+          final budget = Budget(
+            id: 'budget_${DateTime.now().millisecondsSinceEpoch}',
+            category: category,
+            monthlyLimit: limit,
+          );
+          finance.saveBudget(budget);
+        },
+      ),
     );
   }
 
@@ -96,20 +96,19 @@ class BudgetScreen extends StatelessWidget {
   ) {
     showDialog(
       context: context,
-      builder:
-          (_) => _BudgetDialog(
-            finance: finance,
-            budget: budget,
-            onSave: (category, limit) {
-              final updated = Budget(
-                id: budget.id,
-                category: category,
-                monthlyLimit: limit,
-                isActive: budget.isActive,
-              );
-              finance.saveBudget(updated);
-            },
-          ),
+      builder: (_) => _BudgetDialog(
+        finance: finance,
+        budget: budget,
+        onSave: (category, limit) {
+          final updated = Budget(
+            id: budget.id,
+            category: category,
+            monthlyLimit: limit,
+            isActive: budget.isActive,
+          );
+          finance.saveBudget(updated);
+        },
+      ),
     );
   }
 
@@ -120,27 +119,26 @@ class BudgetScreen extends StatelessWidget {
   ) {
     showDialog(
       context: context,
-      builder:
-          (ctx) => AlertDialog(
-            title: const Text('Delete Budget'),
-            content: const Text('Are you sure you want to delete this budget?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  finance.deleteBudget(budget.id);
-                  Navigator.pop(ctx);
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.red.shade400,
-                ),
-                child: const Text('Delete'),
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Budget'),
+        content: const Text('Are you sure you want to delete this budget?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
           ),
+          TextButton(
+            onPressed: () {
+              finance.deleteBudget(budget.id);
+              Navigator.pop(ctx);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red.shade400,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -183,17 +181,7 @@ class _EmptyBudgetState extends StatelessWidget {
               onPressed: onCreate,
               icon: const Icon(Icons.add_rounded),
               label: const Text('Create Budget'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey.shade800,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              style: AppButtonStyles.primaryLarge,
             ),
           ],
         ),
@@ -222,12 +210,9 @@ class _BudgetCard extends StatelessWidget {
     final percentage = budget.getUsagePercentage(transactions);
     final isOverBudget = budget.isOverBudget(transactions);
 
-    final color =
-        isOverBudget
-            ? Colors.red.shade400
-            : (percentage >= 80
-                ? Colors.orange.shade400
-                : Colors.green.shade400);
+    final color = isOverBudget
+        ? Colors.red.shade400
+        : (percentage >= 80 ? Colors.orange.shade400 : Colors.green.shade400);
 
     return Card(
       elevation: 2,
@@ -440,19 +425,18 @@ class _BudgetDialogState extends State<_BudgetDialog> {
                 borderSide: BorderSide.none,
               ),
             ),
-            items:
-                [
-                  TransactionCategory.spend,
-                  TransactionCategory.family,
-                  TransactionCategory.savingsDeposit,
-                  TransactionCategory.loanPayment,
-                  TransactionCategory.feePayment,
-                ].map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(_getCategoryName(category)),
-                  );
-                }).toList(),
+            items: [
+              TransactionCategory.spend,
+              TransactionCategory.family,
+              TransactionCategory.savingsDeposit,
+              TransactionCategory.loanPayment,
+              TransactionCategory.feePayment,
+            ].map((category) {
+              return DropdownMenuItem(
+                value: category,
+                child: Text(_getCategoryName(category)),
+              );
+            }).toList(),
             onChanged: (value) {
               if (value != null) setState(() => _selectedCategory = value);
             },
@@ -487,12 +471,7 @@ class _BudgetDialogState extends State<_BudgetDialog> {
               Navigator.pop(context);
             }
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey.shade800,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
+          style: AppButtonStyles.primaryElevated,
           child: const Text('Save'),
         ),
       ],

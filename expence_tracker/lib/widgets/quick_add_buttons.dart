@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../providers/finance_provider.dart';
-import 'package:provider/provider.dart';
 
-/// Quick-add transaction button widget
+/// Elegant quick-add transaction button for PocketPlan
 class QuickAddButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -24,24 +24,31 @@ class QuickAddButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _showQuickAddDialog(context),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3)),
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: color.withOpacity(0.15), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 6),
             Text(
               label,
               style: TextStyle(
-                color: color,
-                fontSize: 12,
+                color: Colors.grey.shade800,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -52,50 +59,55 @@ class QuickAddButton extends StatelessWidget {
   }
 
   Future<void> _showQuickAddDialog(BuildContext context) async {
-    final amountController = TextEditingController(
-      text: defaultAmount.toStringAsFixed(0),
-    );
+    final amountController =
+        TextEditingController(text: defaultAmount.toStringAsFixed(0));
     final descriptionController = TextEditingController(text: label);
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Quick Add $label'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: amountController,
-                  decoration: const InputDecoration(
-                    labelText: 'Amount',
-                    prefixText: '₹',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                  autofocus: true,
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(width: 10),
+            Text('Quick Add $label',
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTextField(
+              controller: amountController,
+              label: 'Amount',
+              prefixText: '₹',
+              keyboardType: TextInputType.number,
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Add'),
-              ),
-            ],
+            const SizedBox(height: 14),
+            _buildTextField(
+              controller: descriptionController,
+              label: 'Description',
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey.shade800,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
     );
 
     if (confirmed != true) return;
@@ -107,7 +119,7 @@ class QuickAddButton extends StatelessWidget {
       id: 'txn_${DateTime.now().millisecondsSinceEpoch}',
       amount: amount,
       category: category,
-      description: descriptionController.text,
+      description: descriptionController.text.trim(),
     );
 
     if (context.mounted) {
@@ -116,65 +128,90 @@ class QuickAddButton extends StatelessWidget {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Added ${descriptionController.text}'),
+          content: Text('✅ Added ${descriptionController.text}'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.grey.shade800,
           duration: const Duration(seconds: 2),
         ),
       );
     }
   }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    String? prefixText,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixText: prefixText,
+        filled: true,
+        fillColor: const Color(0xFFF3F5F8),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
 }
 
-/// Quick-add buttons row for common transactions
+/// Clean, scrollable quick-add row for common expense shortcuts
 class QuickAddButtonsRow extends StatelessWidget {
   const QuickAddButtonsRow({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final buttons = [
+      QuickAddButton(
+        icon: Icons.restaurant_rounded,
+        label: 'Food',
+        color: Colors.orange.shade400,
+        defaultAmount: 200,
+        category: TransactionCategory.spend,
+      ),
+      QuickAddButton(
+        icon: Icons.local_gas_station_rounded,
+        label: 'Fuel',
+        color: Colors.red.shade400,
+        defaultAmount: 500,
+        category: TransactionCategory.spend,
+      ),
+      QuickAddButton(
+        icon: Icons.shopping_bag_rounded,
+        label: 'Shopping',
+        color: Colors.purple.shade400,
+        defaultAmount: 1000,
+        category: TransactionCategory.spend,
+      ),
+      QuickAddButton(
+        icon: Icons.medical_services_rounded,
+        label: 'Medical',
+        color: Colors.teal.shade400,
+        defaultAmount: 300,
+        category: TransactionCategory.family,
+      ),
+      QuickAddButton(
+        icon: Icons.commute_rounded,
+        label: 'Transport',
+        color: Colors.blue.shade400,
+        defaultAmount: 100,
+        category: TransactionCategory.spend,
+      ),
+    ];
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
-        children: [
-          QuickAddButton(
-            icon: Icons.restaurant,
-            label: 'Food',
-            color: Colors.orange,
-            defaultAmount: 200,
-            category: TransactionCategory.spend,
-          ),
-          const SizedBox(width: 12),
-          QuickAddButton(
-            icon: Icons.local_gas_station,
-            label: 'Fuel',
-            color: Colors.red,
-            defaultAmount: 500,
-            category: TransactionCategory.spend,
-          ),
-          const SizedBox(width: 12),
-          QuickAddButton(
-            icon: Icons.shopping_bag,
-            label: 'Shopping',
-            color: Colors.purple,
-            defaultAmount: 1000,
-            category: TransactionCategory.spend,
-          ),
-          const SizedBox(width: 12),
-          QuickAddButton(
-            icon: Icons.medication,
-            label: 'Medical',
-            color: Colors.pink,
-            defaultAmount: 300,
-            category: TransactionCategory.family,
-          ),
-          const SizedBox(width: 12),
-          QuickAddButton(
-            icon: Icons.commute,
-            label: 'Transport',
-            color: Colors.blue,
-            defaultAmount: 100,
-            category: TransactionCategory.spend,
-          ),
-        ],
+        children: List.generate(buttons.length * 2 - 1, (index) {
+          if (index.isOdd) return const SizedBox(width: 12);
+          return buttons[index ~/ 2];
+        }),
       ),
     );
   }

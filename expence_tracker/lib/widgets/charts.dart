@@ -84,27 +84,26 @@ class ChartLegend extends StatelessWidget {
     return Wrap(
       spacing: 12,
       runSpacing: 8,
-      children:
-          categoryData.entries.map((entry) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: colors[entry.key] ?? Colors.grey,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${_getCategoryName(entry.key)}: ${formatCurrency(entry.value)}',
-                  style: const TextStyle(fontSize: 12),
-                ),
-              ],
-            );
-          }).toList(),
+      children: categoryData.entries.map((entry) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: colors[entry.key] ?? Colors.grey,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              '${_getCategoryName(entry.key)}: ${formatCurrency(entry.value)}',
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        );
+      }).toList(),
     );
   }
 
@@ -158,7 +157,7 @@ class SpendingTrendChart extends StatelessWidget {
       aspectRatio: 2,
       child: LineChart(
         LineChartData(
-          gridData: FlGridData(show: true, drawVerticalLine: false),
+          gridData: const FlGridData(show: true, drawVerticalLine: false),
           titlesData: FlTitlesData(
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
@@ -196,12 +195,11 @@ class SpendingTrendChart extends StatelessWidget {
           borderData: FlBorderData(show: false),
           lineBarsData: [
             LineChartBarData(
-              spots:
-                  dailySpending
-                      .asMap()
-                      .entries
-                      .map((e) => FlSpot(e.key.toDouble(), e.value))
-                      .toList(),
+              spots: dailySpending
+                  .asMap()
+                  .entries
+                  .map((e) => FlSpot(e.key.toDouble(), e.value))
+                  .toList(),
               isCurved: true,
               color: Colors.blue,
               barWidth: 3,

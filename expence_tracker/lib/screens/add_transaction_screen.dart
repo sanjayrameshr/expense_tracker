@@ -4,6 +4,7 @@ import '../models/transaction.dart';
 import '../models/loan.dart';
 import '../providers/finance_provider.dart';
 import '../utils/currency_formatter.dart';
+import '../utils/app_styles.dart';
 
 /// Elegant modern UI for adding new transactions
 class AddTransactionScreen extends StatefulWidget {
@@ -170,11 +171,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             _buildTextField(
               controller: _descriptionController,
               label: 'Description',
-              validator:
-                  (value) =>
-                      value == null || value.isEmpty
-                          ? 'Please enter description'
-                          : null,
+              validator: (value) => value == null || value.isEmpty
+                  ? 'Please enter description'
+                  : null,
             ),
             const SizedBox(height: 16),
 
@@ -187,9 +186,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     label: 'Select Loan',
                     value: _selectedLoan,
                     items: finance.loans,
-                    displayText:
-                        (loan) =>
-                            '${loan.name} (${formatCurrency(loan.currentPrincipal)})',
+                    displayText: (loan) =>
+                        '${loan.name} (${formatCurrency(loan.currentPrincipal)})',
                     onChanged: (value) {
                       setState(() => _selectedLoan = value);
                       _calculateLoanSplit();
@@ -259,15 +257,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           borderSide: BorderSide.none,
         ),
       ),
-      items:
-          items
-              .map(
-                (item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(displayText(item)),
-                ),
-              )
-              .toList(),
+      items: items
+          .map(
+            (item) => DropdownMenuItem(
+              value: item,
+              child: Text(displayText(item)),
+            ),
+          )
+          .toList(),
       onChanged: onChanged,
       validator: validator,
     );
@@ -297,34 +294,28 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _splitRow(String label, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: TextStyle(color: Colors.grey.shade700)),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(label, style: TextStyle(color: Colors.grey.shade700)),
+            Text(
+              value,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: _submitTransaction,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey.shade800,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
+        style: AppButtonStyles.primaryLarge,
         child: const Text(
           'Add Transaction',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),

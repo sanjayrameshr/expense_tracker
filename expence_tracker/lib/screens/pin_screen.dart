@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/finance_provider.dart';
+import '../utils/app_styles.dart';
 import 'dashboard_screen.dart';
 
-/// PIN entry screen for authentication
+/// PocketPlan PIN entry / setup screen
 class PinScreen extends StatefulWidget {
   const PinScreen({super.key});
 
@@ -33,11 +34,10 @@ class _PinScreenState extends State<PinScreen> {
 
     final authProvider = context.read<AuthProvider>();
     final financeProvider = context.read<FinanceProvider>();
-    final pin = _pinController.text;
+    final pin = _pinController.text.trim();
 
     if (authProvider.isFirstRun) {
-      // Set new PIN
-      final confirmPin = _confirmPinController.text;
+      final confirmPin = _confirmPinController.text.trim();
       if (pin != confirmPin) {
         setState(() {
           _errorMessage = 'PINs do not match';
@@ -56,7 +56,6 @@ class _PinScreenState extends State<PinScreen> {
 
       final success = await authProvider.setPin(pin);
       if (success) {
-        // Seed initial data on first run
         await financeProvider.seedInitialData();
         if (mounted) {
           Navigator.of(context).pushReplacement(
@@ -65,7 +64,6 @@ class _PinScreenState extends State<PinScreen> {
         }
       }
     } else {
-      // Verify existing PIN
       final success = await authProvider.verifyPin(pin);
       if (success) {
         await financeProvider.initialize();
@@ -88,77 +86,177 @@ class _PinScreenState extends State<PinScreen> {
     final authProvider = context.watch<AuthProvider>();
     final isFirstRun = authProvider.isFirstRun;
 
+    final gradient = LinearGradient(
+      colors: [Colors.grey.shade100, Colors.white],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    );
+
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(Icons.lock_outline, size: 80, color: Colors.blue),
-              const SizedBox(height: 24),
-              Text(
-                isFirstRun ? 'Set Your PIN' : 'Enter PIN',
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                isFirstRun
-                    ? 'Create a 4-digit PIN to secure your data'
-                    : 'Enter your PIN to access PocketPlan',
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _pinController,
-                decoration: InputDecoration(
-                  labelText: isFirstRun ? 'Create PIN' : 'Enter PIN',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.pin),
-                ),
-                keyboardType: TextInputType.number,
-                obscureText: true,
-                maxLength: 6,
-              ),
-              if (isFirstRun) ...[
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _confirmPinController,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm PIN',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.pin),
+        child: Container(
+          decoration: BoxDecoration(gradient: gradient),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(28.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // App icon area
+                  Container(
+                    padding: const EdgeInsets.all(22),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.lock_rounded,
+                      size: 64,
+                      color: Colors.black87,
+                    ),
                   ),
-                  keyboardType: TextInputType.number,
-                  obscureText: true,
-                  maxLength: 6,
-                ),
-              ],
-              if (_errorMessage.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                Text(
-                  _errorMessage,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child:
-                    _isLoading
-                        ? const CircularProgressIndicator()
-                        : Text(isFirstRun ? 'Set PIN' : 'Unlock'),
+
+                  const SizedBox(height: 30),
+                  Text(
+                    isFirstRun ? 'Set Your PIN' : 'Welcome Back',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    isFirstRun
+                        ? 'Create a secure 4-digit PIN for your PocketPlan app'
+                        : 'Enter your PIN to unlock PocketPlan',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // PIN input fields
+                  _pinField(
+                    controller: _pinController,
+                    label: isFirstRun ? 'Create PIN' : 'Enter PIN',
+                    icon: Icons.pin_outlined,
+                  ),
+                  if (isFirstRun) ...[
+                    const SizedBox(height: 16),
+                    _pinField(
+                      controller: _confirmPinController,
+                      label: 'Confirm PIN',
+                      icon: Icons.pin_outlined,
+                    ),
+                  ],
+
+                  if (_errorMessage.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      _errorMessage,
+                      style: const TextStyle(color: Colors.red, fontSize: 13),
+                    ),
+                  ],
+
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleSubmit,
+                      style: AppButtonStyles.primaryLarge,
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              isFirstRun ? 'Set PIN' : 'Unlock',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  if (!isFirstRun)
+                    TextButton.icon(
+                      onPressed: () => _showResetDialog(context),
+                      icon: const Icon(Icons.help_outline_rounded, size: 18),
+                      label: const Text('Forgot PIN?'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.grey.shade600,
+                      ),
+                    ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _pinField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      obscureText: true,
+      maxLength: 6,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.grey.shade600),
+        filled: true,
+        fillColor: const Color(0xFFF3F5F8),
+        counterText: '',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade500),
+        ),
+      ),
+    );
+  }
+
+  void _showResetDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Reset PIN'),
+        content: const Text(
+          'To reset your PIN, please clear app data or reinstall PocketPlan for your security.',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }
