@@ -18,6 +18,8 @@ class _PinScreenState extends State<PinScreen> {
   final _confirmPinController = TextEditingController();
   bool _isLoading = false;
   String _errorMessage = '';
+  bool _obscurePin = true;
+  bool _obscureConfirmPin = true;
 
   @override
   void dispose() {
@@ -150,6 +152,12 @@ class _PinScreenState extends State<PinScreen> {
                     controller: _pinController,
                     label: isFirstRun ? 'Create PIN' : 'Enter PIN',
                     icon: Icons.pin_outlined,
+                    obscureText: _obscurePin,
+                    onToggleVisibility: () {
+                      setState(() {
+                        _obscurePin = !_obscurePin;
+                      });
+                    },
                   ),
                   if (isFirstRun) ...[
                     const SizedBox(height: 16),
@@ -157,6 +165,12 @@ class _PinScreenState extends State<PinScreen> {
                       controller: _confirmPinController,
                       label: 'Confirm PIN',
                       icon: Icons.pin_outlined,
+                      obscureText: _obscureConfirmPin,
+                      onToggleVisibility: () {
+                        setState(() {
+                          _obscureConfirmPin = !_obscureConfirmPin;
+                        });
+                      },
                     ),
                   ],
 
@@ -217,15 +231,24 @@ class _PinScreenState extends State<PinScreen> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
+    required bool obscureText,
+    required VoidCallback onToggleVisibility,
   }) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
-      obscureText: true,
+      obscureText: obscureText,
       maxLength: 6,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: Colors.grey.shade600),
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscureText ? Icons.visibility_off : Icons.visibility,
+            color: Colors.grey.shade600,
+          ),
+          onPressed: onToggleVisibility,
+        ),
         filled: true,
         fillColor: const Color(0xFFF3F5F8),
         counterText: '',

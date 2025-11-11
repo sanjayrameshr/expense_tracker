@@ -98,6 +98,48 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               key: _formKey,
               child: Column(
                 children: [
+                  // Available Balance Info Card
+                  if (_selectedCategory != TransactionCategory.income)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.blue.shade50, Colors.blue.shade100],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.account_balance_wallet,
+                              color: Colors.blue.shade700),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Available Balance',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                formatCurrency(finance.cashBalance),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue.shade900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (_selectedCategory != TransactionCategory.income)
+                    const SizedBox(height: 16),
                   _buildFormCard(finance),
                   const SizedBox(height: 24),
                   _buildSubmitButton(),
@@ -154,9 +196,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               prefix: '₹',
               keyboardType: TextInputType.number,
               validator: (value) {
-                if (value == null || value.isEmpty)
+                if (value == null || value.isEmpty) {
                   return 'Please enter amount';
-                if (double.tryParse(value) == null) return 'Enter valid number';
+                }
+                final amount = double.tryParse(value);
+                if (amount == null) return 'Enter valid number';
+
+                // Check if spending more than available balance
+                if (_selectedCategory != TransactionCategory.income) {
+                  final currentBalance = finance.cashBalance;
+                  if (amount > currentBalance) {
+                    return 'Insufficient balance (Available: ${formatCurrency(currentBalance)})';
+                  }
+                }
+
                 return null;
               },
               onChanged: (_) {

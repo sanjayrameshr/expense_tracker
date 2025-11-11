@@ -51,19 +51,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ],
         ),
-        // 🎨 MODIFIED: Added toolbarHeight for the new title
-        toolbarHeight: 65,
+        // 🎨 MODIFIED: Increased toolbarHeight for better visibility
+        toolbarHeight: 75,
         elevation: 0,
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_outlined),
+            icon: const Icon(Icons.settings_outlined, size: 28),
+            iconSize: 28,
+            padding: const EdgeInsets.all(12),
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const SettingsScreen()),
             ),
           ),
+          const SizedBox(width: 4),
         ],
       ),
 

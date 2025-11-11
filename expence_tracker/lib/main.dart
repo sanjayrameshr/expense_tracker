@@ -52,7 +52,7 @@ class PocketPlanApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
           useMaterial3: true,
-          cardTheme: const CardTheme(elevation: 2),
+          cardTheme: const CardThemeData(elevation: 2),
           inputDecorationTheme: InputDecorationTheme(
             border: const OutlineInputBorder(),
             contentPadding: const EdgeInsets.symmetric(
