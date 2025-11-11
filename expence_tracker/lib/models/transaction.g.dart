@@ -25,13 +25,14 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       loanId: fields[5] as String?,
       interestPortion: fields[6] as double?,
       principalPortion: fields[7] as double?,
+      feesGoalId: fields[8] as String?, // --- ADDED ---
     );
   }
 
   @override
   void write(BinaryWriter writer, Transaction obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9) // --- BUMPED from 8 to 9 ---
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       ..writeByte(6)
       ..write(obj.interestPortion)
       ..writeByte(7)
-      ..write(obj.principalPortion);
+      ..write(obj.principalPortion)
+      ..writeByte(8) // --- ADDED ---
+      ..write(obj.feesGoalId);
   }
 
   @override

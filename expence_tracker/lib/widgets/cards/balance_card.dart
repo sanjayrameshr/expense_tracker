@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/app_colors.dart';
 
 /// Main balance card with gradient background
 class MainBalanceCard extends StatelessWidget {
@@ -18,14 +19,14 @@ class MainBalanceCard extends StatelessWidget {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias, // Ensures gradient respects border radius
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFBCCCDC), Color(0xFFD9E2EC)],
+          gradient: LinearGradient(
+            colors: AppColors.balanceGradient,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(20),
         ),
         child: Material(
           color: Colors.transparent,
@@ -38,51 +39,38 @@ class MainBalanceCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.account_balance_wallet_rounded,
-                          color: Colors.grey.shade800,
-                          size: 26,
+                      Text(
+                        'Current Balance',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const Spacer(),
                       Icon(
-                        Icons.trending_up,
-                        color: Colors.grey.shade800,
-                        size: 22,
+                        Icons.account_balance_wallet_rounded,
+                        color: Colors.white.withOpacity(0.9),
+                        size: 26,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Current Balance',
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     formatCurrency(balance),
-                    style: TextStyle(
-                      color: Colors.grey.shade900,
-                      fontSize: 34,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 36,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 16),
                   Text(
                     'Tap to view transactions',
                     style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 13,
                     ),
                   ),
                 ],

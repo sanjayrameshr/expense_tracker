@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Import for date formatting
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../providers/finance_provider.dart';
@@ -14,6 +15,33 @@ class TransactionsScreen extends StatefulWidget {
 
 class _TransactionsScreenState extends State<TransactionsScreen> {
   TransactionCategory? _filterCategory;
+
+  /// --- NEW: Groups transactions by date ---
+  Map<String, List<Transaction>> _groupTransactions(
+      List<Transaction> transactions) {
+    final grouped = <String, List<Transaction>>{};
+    final now = DateTime.now();
+    final today = DateUtils.dateOnly(now);
+    final yesterday = DateUtils.dateOnly(now.subtract(const Duration(days: 1)));
+
+    for (final txn in transactions) {
+      final date = DateUtils.dateOnly(txn.date);
+      String key;
+      if (date == today) {
+        key = 'Today';
+      } else if (date == yesterday) {
+        key = 'Yesterday';
+      } else {
+        key = DateFormat('MMMM d, yyyy').format(date);
+      }
+
+      if (grouped[key] == null) {
+        grouped[key] = [];
+      }
+      grouped[key]!.add(txn);
+    }
+    return grouped;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +101,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               .fold(0.0, (sum, t) => sum + t.amount);
           final balance = totalIncome - totalExpense;
 
+          // --- NEW: Grouping logic ---
+          final groupedTransactions = _groupTransactions(transactions);
+          final displayList = [];
+          groupedTransactions.forEach((key, txns) {
+            displayList.add(key); // Add date header
+            displayList.addAll(txns); // Add all transactions for that date
+          });
+
           return Column(
             children: [
               _SummaryCard(
@@ -98,13 +134,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           ],
                         ),
                       )
+                    // --- MODIFIED: Use grouped list ---
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
-                        itemCount: transactions.length,
+                        itemCount: displayList.length,
                         itemBuilder: (context, index) {
-                          final txn = transactions[index];
-                          return _TransactionCard(transaction: txn);
+                          final item = displayList[index];
+
+                          if (item is String) {
+                            return _DateHeader(title: item);
+                          }
+                          if (item is Transaction) {
+                            return _TransactionCard(transaction: item);
+                          }
+                          return const SizedBox.shrink();
                         },
                       ),
               ),
@@ -154,6 +198,27 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       case TransactionCategory.feePayment:
         return 'Fee Payment';
     }
+  }
+}
+
+// --- NEW: Date Header Widget ---
+class _DateHeader extends StatelessWidget {
+  final String title;
+  const _DateHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8, left: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.grey.shade700,
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+        ),
+      ),
+    );
   }
 }
 
@@ -266,7 +331,8 @@ class _TransactionCard extends StatelessWidget {
                           fontWeight: FontWeight.w600, fontSize: 15)),
                   const SizedBox(height: 4),
                   Text(
-                    '${_categoryName(transaction.category)} • ${formatDate(transaction.date)}',
+                    // --- MODIFIED: Show category name, not date (date is in header) ---
+                    _categoryName(transaction.category),
                     style:
                         TextStyle(fontSize: 12.5, color: Colors.grey.shade600),
                   ),

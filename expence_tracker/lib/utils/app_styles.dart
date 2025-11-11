@@ -4,47 +4,22 @@ import 'app_colors.dart';
 /// Soft UI Design System - Modern neumorphic styles
 class SoftUI {
   // Color Palette
-  static const softBackground = Color(0xFFE8EAF6);
+  static const softBackground = Color(0xFFF8F9FB); // Changed to match AppColors
   static const softCard = Color(0xFFFFFFFF);
-  static const softShadowLight = Color(0xFFFFFFFF);
-  static const softShadowDark = Color(0xFFD1D9E6);
 
-  static const primaryGradient = LinearGradient(
-    colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const accentGradient = LinearGradient(
-    colors: [Color(0xFF43E97B), Color(0xFF38F9D7)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  static const warningGradient = LinearGradient(
-    colors: [Color(0xFFFA709A), Color(0xFFFF8C00)],
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-  );
-
-  // Soft shadow for elevated effect
+  // --- Modern, subtle shadow (replaces old SoftUI) ---
   static List<BoxShadow> softShadow = [
     BoxShadow(
-      color: softShadowDark.withOpacity(0.3),
-      offset: const Offset(6, 6),
-      blurRadius: 12,
-    ),
-    const BoxShadow(
-      color: softShadowLight,
-      offset: Offset(-6, -6),
+      color: Colors.black.withOpacity(0.08),
+      offset: const Offset(0, 4),
       blurRadius: 12,
     ),
   ];
 
-  // Soft shadow for pressed/inset effect
+  // --- Inset shadow (unchanged) ---
   static List<BoxShadow> softShadowInset = [
     BoxShadow(
-      color: softShadowDark.withOpacity(0.2),
+      color: Colors.black.withOpacity(0.1),
       offset: const Offset(4, 4),
       blurRadius: 8,
       spreadRadius: -2,
@@ -65,7 +40,7 @@ class SoftUI {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withOpacity(0.15),
             offset: const Offset(0, 8),
             blurRadius: 20,
           ),

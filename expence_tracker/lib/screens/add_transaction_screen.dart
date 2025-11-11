@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../models/loan.dart';
+import '../models/fees_goal.dart'; // Import FeesGoal
 import '../providers/finance_provider.dart';
 import '../utils/currency_formatter.dart';
 import '../utils/app_styles.dart';
@@ -21,6 +22,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   TransactionCategory _selectedCategory = TransactionCategory.spend;
   Loan? _selectedLoan;
+  FeesGoal? _selectedFeesGoal; // --- ADDED ---
   double? _interestPortion;
   double? _principalPortion;
 
@@ -59,6 +61,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       loanId: _selectedLoan?.id,
       interestPortion: _interestPortion,
       principalPortion: _principalPortion,
+      feesGoalId: _selectedFeesGoal?.id, // --- ADDED ---
     );
 
     final finance = context.read<FinanceProvider>();
@@ -182,6 +185,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 setState(() {
                   _selectedCategory = value!;
                   _selectedLoan = null;
+                  _selectedFeesGoal = null; // --- ADDED ---
                   _interestPortion = null;
                   _principalPortion = null;
                 });
@@ -230,7 +234,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Loan selection
+            // --- MODIFIED: Loan selection ---
             if (_selectedCategory == TransactionCategory.loanPayment)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,6 +263,29 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     _buildLoanSplitCard(),
                 ],
               ),
+
+            // --- NEW: Fees Goal selection ---
+            if (_selectedCategory == TransactionCategory.feePayment)
+              _buildDropdownField<FeesGoal>(
+                label: 'Select Goal',
+                value: _selectedFeesGoal,
+                items: finance.feesGoals,
+                displayText: (goal) =>
+                    '${goal.name} (${formatCurrency(goal.remainingAmount)} left)',
+                onChanged: (value) {
+                  setState(() => _selectedFeesGoal = value);
+                },
+                validator: (value) {
+                  if (_selectedCategory == TransactionCategory.feePayment &&
+                      value == null &&
+                      finance.feesGoals.isNotEmpty) {
+                    return 'Please select a goal';
+                  }
+                  return null;
+                },
+              ),
+            if (_selectedCategory == TransactionCategory.feePayment)
+              const SizedBox(height: 16),
           ],
         ),
       ),

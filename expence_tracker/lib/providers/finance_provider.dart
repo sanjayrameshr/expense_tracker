@@ -81,14 +81,36 @@ class FinanceProvider extends ChangeNotifier {
       await _storage.updateLoan(loan);
     }
 
-    // If it's a fee payment, update fees goal
+    // --- MODIFIED: Update specific fees goal ---
     if (transaction.category == TransactionCategory.feePayment) {
-      for (var goal in _feesGoals) {
-        if (goal.remainingAmount > 0) {
-          goal.currentAmount += transaction.amount;
-          await _storage.updateFeesGoal(goal);
-          break;
+      FeesGoal? goalToUpdate;
+
+      // 1. Try to find the specific goal from the transaction
+      if (transaction.feesGoalId != null) {
+        try {
+          goalToUpdate = _feesGoals.firstWhere(
+            (g) => g.id == transaction.feesGoalId,
+          );
+        } catch (e) {
+          goalToUpdate = null;
         }
+      }
+
+      // 2. Fallback: if no specific goal, find the first one with remaining amount
+      if (goalToUpdate == null) {
+        try {
+          goalToUpdate = _feesGoals.firstWhere(
+            (g) => g.remainingAmount > 0,
+          );
+        } catch (e) {
+          goalToUpdate = null;
+        }
+      }
+
+      // 3. Update the goal if found
+      if (goalToUpdate != null) {
+        goalToUpdate.currentAmount += transaction.amount;
+        await _storage.updateFeesGoal(goalToUpdate);
       }
     }
 
