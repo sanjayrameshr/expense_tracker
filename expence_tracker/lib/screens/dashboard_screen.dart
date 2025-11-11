@@ -95,21 +95,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
 
-      // 🔹 Floating Action Button with Soft UI gradient
-      floatingActionButton: Container(
-        width: 64,
-        height: 64,
-        decoration: SoftUI.gradientCardDecoration(SoftUI.primaryGradient),
-        child: FloatingActionButton(
-          heroTag: 'dashboard_fab',
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+      // 🔹 Floating Action Button
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'dashboard_fab',
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
         ),
+        backgroundColor: Colors.white,
+        elevation: 3,
+        child: const Icon(Icons.add_rounded, color: Colors.blue, size: 32),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
@@ -118,66 +113,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // 🌿 Soft UI Bottom Navigation Bar
+  // 🌿 Blue themed Bottom Navigation Bar
   Widget _buildBottomNavBar() {
+    final activeColor = Colors.blue;
+    final inactiveColor = Colors.grey.shade600;
+
     return Container(
       height: 75,
       padding: const EdgeInsets.only(bottom: 5),
       decoration: BoxDecoration(
-        color: SoftUI.softCard,
+        color: Colors.white,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
         ),
         boxShadow: [
           BoxShadow(
-            color: SoftUI.softShadowDark.withOpacity(0.15),
-            blurRadius: 20,
-            spreadRadius: 0,
-            offset: const Offset(0, -5),
+            color: Colors.black.withOpacity(0.09),
+            blurRadius: 12,
+            spreadRadius: 1,
+            offset: const Offset(0, -3),
           ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(Icons.home_rounded, 'Home', 0),
-          _buildNavItem(Icons.credit_card_rounded, 'Loans', 1),
+          _buildNavItem(
+              Icons.home_rounded, 'Home', 0, activeColor, inactiveColor),
+          _buildNavItem(Icons.credit_card_rounded, 'Loans', 1, activeColor,
+              inactiveColor),
           const SizedBox(width: 60),
-          _buildNavItem(Icons.account_balance_wallet_outlined, 'Budgets', 2),
-          _buildNavItem(Icons.school_rounded, 'Fees', 3),
+          _buildNavItem(Icons.account_balance_wallet_outlined, 'Budgets', 2,
+              activeColor, inactiveColor),
+          _buildNavItem(
+              Icons.school_rounded, 'Fees', 3, activeColor, inactiveColor),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
+  Widget _buildNavItem(IconData icon, String label, int index,
+      Color activeColor, Color inactiveColor) {
     final bool isActive = _currentIndex == index;
-    final activeColor = const Color(0xFF667EEA);
-    final inactiveColor = const Color(0xFF8E9AAF);
 
     return InkWell(
       onTap: () => setState(() => _currentIndex = index),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       splashColor: activeColor.withOpacity(0.1),
       highlightColor: activeColor.withOpacity(0.1),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         transform: Matrix4.translationValues(0, isActive ? -4 : 0, 0),
         decoration: BoxDecoration(
-          gradient: isActive ? SoftUI.primaryGradient : null,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: activeColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
+          color: isActive ? activeColor.withOpacity(0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -185,13 +177,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Icon(
               icon,
               size: 24,
-              color: isActive ? Colors.white : inactiveColor,
+              color: isActive ? activeColor : inactiveColor,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? Colors.white : inactiveColor,
+                color: isActive ? activeColor : inactiveColor,
                 fontSize: 12,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               ),
