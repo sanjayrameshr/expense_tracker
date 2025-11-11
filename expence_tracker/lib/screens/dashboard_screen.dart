@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../providers/finance_provider.dart';
 import '../utils/currency_formatter.dart';
-import '../utils/app_colors.dart';
 import '../utils/app_styles.dart';
 import '../widgets/widgets.dart';
 import 'add_transaction_screen.dart';
@@ -27,46 +26,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: SoftUI.softBackground,
       appBar: AppBar(
-        // ✨ NEW: Upgraded AppBar title for a friendlier feel
+        // ✨ Soft UI: Clean gradient title
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                SoftUI.softBackground,
+                SoftUI.softBackground.withOpacity(0.95)
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'Welcome Back',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: AppColors.textPrimary.withOpacity(0.7),
-              ),
+              style: SoftUI.caption.copyWith(fontSize: 13),
             ),
             const Text(
               'PocketPlan',
-              style: TextStyle(
-                fontWeight: FontWeight.w700, // Made it bolder
-                fontSize: 20, // Slightly larger
-              ),
+              style: SoftUI.heading2,
             ),
           ],
         ),
-        // 🎨 MODIFIED: Increased toolbarHeight for better visibility
         toolbarHeight: 75,
         elevation: 0,
-        backgroundColor: AppColors.background,
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: Colors.transparent,
+        foregroundColor: const Color(0xFF2D3142),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined, size: 28),
-            iconSize: 28,
-            padding: const EdgeInsets.all(12),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          Container(
+            margin: const EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              color: SoftUI.softCard,
+              shape: BoxShape.circle,
+              boxShadow: SoftUI.softShadow,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.settings_outlined, size: 22),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              ),
             ),
           ),
-          const SizedBox(width: 4),
         ],
       ),
 
@@ -87,17 +95,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
 
-      // 🔹 Floating Action Button
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'dashboard_fab',
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+      // 🔹 Floating Action Button with Soft UI gradient
+      floatingActionButton: Container(
+        width: 64,
+        height: 64,
+        decoration: SoftUI.gradientCardDecoration(SoftUI.primaryGradient),
+        child: FloatingActionButton(
+          heroTag: 'dashboard_fab',
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddTransactionScreen()),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 32),
         ),
-        backgroundColor: AppButtonStyles.fabBackground,
-        elevation: 3,
-        child: Icon(Icons.add_rounded,
-            color: AppButtonStyles.fabIconColor, size: 30),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
@@ -106,80 +118,80 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // 🌿 Rounded bottom bar
+  // 🌿 Soft UI Bottom Navigation Bar
   Widget _buildBottomNavBar() {
-    final activeColor = AppColors.navActive;
-    final inactiveColor = AppColors.navInactive;
-
     return Container(
-      // 🎨 MODIFIED: Increased height for a more modern feel
       height: 75,
-      padding: const EdgeInsets.only(bottom: 5), // Added for safe area spacing
+      padding: const EdgeInsets.only(bottom: 5),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: SoftUI.softCard,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(22),
-          topRight: Radius.circular(22),
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
         ),
         boxShadow: [
-          // 🎨 MODIFIED: A softer, more modern shadow
           BoxShadow(
-            color: Colors.black.withOpacity(0.09),
-            blurRadius: 12,
-            spreadRadius: 1,
-            offset: const Offset(0, -3),
+            color: SoftUI.softShadowDark.withOpacity(0.15),
+            blurRadius: 20,
+            spreadRadius: 0,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(
-              Icons.home_rounded, 'Home', 0, activeColor, inactiveColor),
-          _buildNavItem(Icons.credit_card_rounded, 'Loans', 1, activeColor,
-              inactiveColor),
+          _buildNavItem(Icons.home_rounded, 'Home', 0),
+          _buildNavItem(Icons.credit_card_rounded, 'Loans', 1),
           const SizedBox(width: 60),
-          _buildNavItem(Icons.account_balance_wallet_outlined, 'Budgets', 2,
-              activeColor, inactiveColor),
-          _buildNavItem(
-              Icons.school_rounded, 'Fees', 3, activeColor, inactiveColor),
+          _buildNavItem(Icons.account_balance_wallet_outlined, 'Budgets', 2),
+          _buildNavItem(Icons.school_rounded, 'Fees', 3),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index,
-      Color activeColor, Color inactiveColor) {
+  Widget _buildNavItem(IconData icon, String label, int index) {
     final bool isActive = _currentIndex == index;
+    final activeColor = const Color(0xFF667EEA);
+    final inactiveColor = const Color(0xFF8E9AAF);
+
     return InkWell(
       onTap: () => setState(() => _currentIndex = index),
-      borderRadius: BorderRadius.circular(12),
-      // ✨ NEW: Added highlight and splash for better feedback
+      borderRadius: BorderRadius.circular(16),
       splashColor: activeColor.withOpacity(0.1),
       highlightColor: activeColor.withOpacity(0.1),
       child: AnimatedContainer(
-        // 🎨 MODIFIED: Slightly longer duration and added a curve
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        // ✨ NEW: Add a transform to "pop" the active item
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         transform: Matrix4.translationValues(0, isActive ? -4 : 0, 0),
-        transformAlignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isActive
-              ? activeColor.withOpacity(0.12) // slightly more visible
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          gradient: isActive ? SoftUI.primaryGradient : null,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: activeColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 24, color: isActive ? activeColor : inactiveColor),
+            Icon(
+              icon,
+              size: 24,
+              color: isActive ? Colors.white : inactiveColor,
+            ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? activeColor : inactiveColor,
+                color: isActive ? Colors.white : inactiveColor,
                 fontSize: 12,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               ),
@@ -254,8 +266,6 @@ class _DashboardHome extends StatelessWidget {
               ExpenseBreakdownCard(finance: finance),
               const SizedBox(height: 16),
               SpendingTrendCard(finance: finance),
-              const SizedBox(height: 16),
-              QuickStatsCard(finance: finance),
               const SizedBox(height: 80),
             ],
           ),

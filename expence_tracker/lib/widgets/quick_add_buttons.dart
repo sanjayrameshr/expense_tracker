@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../providers/finance_provider.dart';
+import '../utils/app_styles.dart';
 
-/// Elegant quick-add transaction button for PocketPlan
+/// Soft UI Quick-add transaction button
 class QuickAddButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -24,32 +25,42 @@ class QuickAddButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _showQuickAddDialog(context),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: color.withOpacity(0.15), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: SoftUI.softCard,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: SoftUI.softShadow,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 26),
-            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color.withOpacity(0.8), color],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+            const SizedBox(height: 10),
             Text(
               label,
-              style: TextStyle(
-                color: Colors.grey.shade800,
-                fontSize: 13,
+              style: SoftUI.caption.copyWith(
                 fontWeight: FontWeight.w600,
+                fontSize: 13,
               ),
             ),
           ],
@@ -128,7 +139,7 @@ class QuickAddButton extends StatelessWidget {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ Added ${descriptionController.text}'),
+          content: Text('Added ${descriptionController.text}'),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.grey.shade800,
           duration: const Duration(seconds: 2),

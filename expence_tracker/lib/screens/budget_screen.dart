@@ -42,17 +42,18 @@ class BudgetScreen extends StatelessWidget {
               if (index == budgets.length) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: OutlinedButton.icon(
+                  child: ElevatedButton.icon(
                     onPressed: () => _showAddBudgetDialog(context, finance),
                     icon: const Icon(Icons.add_rounded),
                     label: const Text('Add New Budget'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.grey.shade800,
-                      side: BorderSide(color: Colors.grey.shade400),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      elevation: 2,
                     ),
                   ),
                 );

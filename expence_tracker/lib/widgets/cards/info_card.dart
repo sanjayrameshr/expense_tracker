@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../utils/app_styles.dart';
 
-/// Reusable information card with icon and title
+/// Soft UI Information card with icon and title
 class InfoCard extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -19,10 +20,8 @@ class InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: SoftUI.cardDecoration(),
       child: Padding(
         padding: padding ?? const EdgeInsets.all(20),
         child: Column(
@@ -31,26 +30,34 @@ class InfoCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(
+                      colors: [color.withOpacity(0.8), color],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: color.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: Icon(icon, color: color, size: 22),
+                  child: Icon(icon, color: Colors.white, size: 20),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade800,
-                        ),
+                    style: SoftUI.heading2.copyWith(fontSize: 18),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             child,
           ],
         ),

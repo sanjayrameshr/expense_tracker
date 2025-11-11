@@ -193,7 +193,7 @@ class SettingsScreen extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: Colors.grey.shade800,
-            content: Text('✅ Backup saved to:\n$filePath'),
+            content: Text('Backup saved to:\n$filePath'),
             duration: const Duration(seconds: 4),
           ),
         );
@@ -254,7 +254,7 @@ class SettingsScreen extends StatelessWidget {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('✅ Data imported successfully')));
+            const SnackBar(content: Text('Data imported successfully')));
       }
     } catch (e) {
       if (context.mounted) {
@@ -312,8 +312,8 @@ class SettingsScreen extends StatelessWidget {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            success ? '✅ PIN changed successfully' : 'Failed to change PIN'),
+        content:
+            Text(success ? 'PIN changed successfully' : 'Failed to change PIN'),
       ));
     }
   }
@@ -354,7 +354,7 @@ class SettingsScreen extends StatelessWidget {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('✅ Sample data loaded successfully!'),
+        content: Text('Sample data loaded successfully!'),
         backgroundColor: Colors.green,
       ));
     }
